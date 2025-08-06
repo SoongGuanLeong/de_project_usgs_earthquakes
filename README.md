@@ -105,7 +105,7 @@ de_project_usgs_earthquakes/
 ```
 
 ## 🚀 Getting Started: Duplicate This Project Locally
-This project is designed to be easily reproducible using Docker and Docker Compose. Follow these steps to set up and run the entire data pipeline on your local machine.
+This project is designed to be easily reproducible using Docker and Docker Compose. Follow these steps to set up and run the entire data pipeline on your local machine. Let me know if i forget to write anything.
 
 ### Prerequisites
 Before you begin, ensure you have the following installed on your system:
@@ -116,11 +116,46 @@ Before you begin, ensure you have the following installed on your system:
 ### Setup Steps
 1. Clone the Repository
 2. Setup Google Cloud Platform (GCP). You need to have the following:
-  - GCP Project
-  - Service Account that have permission `BigQuery Data Editor`, `BigQuery Job User`, `BigQuery User`, `Storage Admin`, `Storage Object Creator` (these were what I used), then download the key as json.
-  - Google Cloud Storage (GCS) Bucket and then create two folder (raw & parquet) in the bucket.
-  - BigQuery Datasets (while we will create bronze, silver and gold, we need to create one for dbt to test connection to bigquery)
+    - GCP Project
+    - Service Account that have permission `BigQuery Data Editor`, `BigQuery Job User`, `BigQuery User`, `Storage Admin`, `Storage Object Creator` (these were what I used), then download the key as json.
+    - Google Cloud Storage (GCS) Bucket and then create two folder (raw & parquet) in the bucket.
+    - BigQuery Datasets (while we will create bronze, silver and gold, we need to create one for dbt to test connection to bigquery)
+3. In the folder `airflow`, create folders with these names: `logs`, `config`, `plugins`, `data`, `.gcp`, `.dbt`
+4. Put your service account key json file inside `.gcp`.
+5. Configure your profiles.yml. The file should be similar with mine below.
+```YAML
+# ~/.dbt/profiles.yml
 
+usgs_earthquake_project:
+  target: dev
+
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      keyfile: /home/airflow/.gcp/your_service_account_key.json
+      project: my-free-tier-16-6
+      location: asia-southeast1
+      threads: 4
+      priority: interactive
+      schema: dbt_soong
+```
+6. Go into airflow folder, open a terminal and open the docker desktop app. Run the commands below one by one. 
+```bash
+docker compose up airflow-init
+docker compose up -d --build
+```
+7. Should you fail in step 6, clean and restart docker desktop. Two things might be culprit:
+```
+# 2 lines below remove everything in docker desktop. PLS PROCEED WITH CAUTION!!!
+docker compose down --volumes --remove-orphans
+docker system prune -a
+```
+- reason 1: your pc chipset is too old to run latest airflow image (I have a old laptop that can't run this project.). Use [this link](https://airflow.apache.org/docs/apache-airflow/3.0.3/docker-compose.yaml) to download this official apache airflow docker-compose.yml file and repeat step 6 using this file. If you can run this file this is not the reason you fail in step 6.
+- reason 2: there is some misconfiguration in your files that is related to file path, cloud storage name or bigquery configuration. Find and correct them. They are most likely in the yml files in dbt folder and the files in scripts folder. Repeat step 6 until everything turn green.
+8. Go to your browser and goto localhost:8080. Find your dag and run it. The dag should be the last one listed after all the example dags.
+9. If one of your task in the dag fail, you can open the `airflow-api-server` container in docker desktop. Copy the commands in the script of that task into the airflow terminal (`exec` tab) to find out what error it is.
+    
 ## 🛡️ License
 
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and share this project with proper attribution.
