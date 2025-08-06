@@ -116,10 +116,10 @@ Before you begin, ensure you have the following installed on your system:
 ### Setup Steps
 1. Clone the Repository
 2. Setup Google Cloud Platform (GCP). You need to have the following:
-- GCP Project
-- Service Account that have permission `BigQuery Data Editor`, `BigQuery Job User`, `BigQuery User`, `Storage Admin`, `Storage Object Creator`, then download the key as json.
-- Google Cloud Storage (GCS) Bucket and then create two folder (raw & parquet) in the bucket.
-- BigQuery Datasets (while we will create bronze, silver and gold, we need to create one for dbt to test connection to bigquery)
+  - GCP Project
+  - Service Account that have permission `BigQuery Data Editor`, `BigQuery Job User`, `BigQuery User`, `Storage Admin`, `Storage Object Creator` (these were what I used), then download the key as json.
+  - Google Cloud Storage (GCS) Bucket and then create two folder (raw & parquet) in the bucket.
+  - BigQuery Datasets (while we will create bronze, silver and gold, we need to create one for dbt to test connection to bigquery)
 
 ## 🛡️ License
 
