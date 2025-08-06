@@ -10,4 +10,5 @@ The core objective of this project is to create a reliable and scalable workflow
 
 ---
 ## 🏗️ Data Architecture
-
+The data architecture for this project follows Medallion Architecture Bronze, Silver, and Gold layers:
+![Data Architecture](docs/data architecture.png)
