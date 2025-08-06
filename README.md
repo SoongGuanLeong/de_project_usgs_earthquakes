@@ -44,3 +44,9 @@ The pipeline follows a typical Extract, Load, Transform (ELT) pattern:
 5. **Transform (T)** - Modeling: dbt is used to build and test data models. It transforms the raw data from the bronze layer into cleaned, structured tables in the silver layer, and then aggregates/prepares data for analytical use cases in the gold layer.
 
 This project demonstrates a robust, cloud-native approach to building a scalable and maintainable data pipeline for analytical purposes.
+
+---
+
+## 🛡️ License
+
+This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and share this project with proper attribution.
