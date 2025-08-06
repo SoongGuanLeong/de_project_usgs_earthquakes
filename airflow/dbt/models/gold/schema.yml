@@ -1,0 +1,584 @@
+version: 2
+
+models:
+  - name: dim_event_type
+    description: Dimension table for earthquake event types
+    columns:
+      - name: event_type_key
+        description: Unique identifier for the event type
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: event_type_name
+        description: Type of seismic event.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: dim_date
+    description: Dimension table for datetime attributes for earthquake events. This table is automatically generated.
+    columns:
+      - name: date_key
+        description: Primary key for the time dimension (YYYYMMDD integer).
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_increasing:
+              strictly: true
+              severity: warn
+      - name: full_date
+        description: Full date of the time dimension entry.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "CAST ('1990-01-01' AS DATE)"
+              max_value: "CAST ('2024-12-31' AS DATE)"
+              severity: warn
+      - name: date_day
+        description: Day of the month.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 31
+              severity: warn
+      - name: date_month
+        description: Month number of the date.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 12
+              severity: warn
+      - name: month_name
+        description: Name of the month
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+              severity: warn
+      - name: date_year
+        description: Year of the date.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1990
+              max_value: 2024
+              severity: warn
+      - name: day_of_week
+        description: Day of the week (1=Sunday, 7=Saturday).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 7
+              severity: warn
+      - name: day_name
+        description: Name of the day of the week (e.g., Monday, Tuesday).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+              severity: warn
+      - name: day_of_year
+        description: Day of the year (1-366).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 366
+              severity: warn
+      - name: week_of_year
+        description: Week number of the year (0-53).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 53
+              severity: warn
+      - name: quarter_of_year
+        description: Quarter number of the year (1-4).
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 4
+              severity: warn
+      - name: is_weekend
+        description: Boolean flag indicating if the date is a weekend.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: [true, false]
+              quote_values: false
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: dim_magnitude_method
+    description: Dimension table for methods used to calculate earthquake magnitudes
+    columns:
+      - name: magnitude_method_key
+        description: Unique identifier for the magnitude method type
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: magnitude_method_name
+        description: The method or algorithm used to calculate the preferred magnitude for the event.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: dim_alert
+    description: Dimension table for earthquake alerts
+    columns:
+      - name: alert_key
+        description: Unique identifier for the alert
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: alert_name
+        description: The alert level from the PAGER earthquake impact scale.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['yellow', 'orange', 'red', 'green', 'unknown']
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: dim_status
+    description: Dimension table for earthquake statuses
+    columns:
+      - name: status_key
+        description: Unique identifier for the status
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: status_name
+        description: 	Indicates whether the event has been reviewed by a human.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['automatic', 'manual', 'reviewed', 'unknown']
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: dim_network
+    description: Dimension table for earthquake networks
+    columns:
+      - name: network_key
+        description: Unique identifier for the network
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: network_name
+        description: 	The network ID of a data contributor. Identifies the network considered to be the preferred source of information for this event.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+  - name: fact_earthquakes
+    description: Fact table containing all earthquake events and their associated measures and foreign keys to dimensions.
+    columns:
+      - name: earthquake_id
+        description: Unique identifier for each earthquake event
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: date_key
+        description: Foreign key to dim_date, representing the date of the event.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: alert_key
+        description: Foreign key to dim_alert.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_alert')
+              field: alert_key
+      - name: event_type_key
+        description: Foreign key to dim_event_type.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_event_type')
+              field: event_type_key
+      - name: magnitude_method_key
+        description: Foreign key to dim_magnitude_method.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_magnitude_method')
+              field: magnitude_method_key
+      - name: network_key
+        description: Foreign key to dim_network.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_network')
+              field: network_key
+      - name: status_key
+        description: Foreign key to dim_status.
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('dim_status')
+              field: status_key
+      - name: magnitude
+        description: The magnitude for the event.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_utils.accepted_range:
+              min_value: 2.0
+              max_value: 10.0
+              severity: warn
+      - name: magnitude_group
+        description: Categorical grouping of earthquake magnitudes.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ["0-2.9 (Minor)", "3.0-3.9 (Light)", "4.0-4.9 (Moderate)", "5.0-5.9 (Strong)", "6.0-6.9 (Major)", "7.0-7.9 (Great)", "8.0+ (Mega)"]
+              quote_values: true
+              severity: warn
+      - name: latitude
+        description: Decimal degrees latitude. Negative values for southern latitudes.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90.0
+              max_value: 90.0
+              severity: warn
+      - name: longitude
+        description: Decimal degrees longitude. Negative values for western longitudes.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180.0
+              max_value: 180.0
+              severity: warn
+      - name: depth_km
+        description: Depth of the event in kilometers.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -10.0
+              max_value: 1000.0
+              severity: warn
+      - name: community_decimal_intensity
+        description: 	The maximum reported intensity (community determined intensity) for the event. Computed by DYFI. While typically reported as a roman numeral, for the purposes of this API, intensity is expected as the decimal equivalent of the roman numeral.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 10.0
+              severity: warn
+              row_condition: "community_decimal_intensity is not null"
+      - name: modified_mercalli_intensity
+        description: The maximum estimated instrumental intensity (modified/measured Mercalli intensity) for the event. Computed by ShakeMap. While typically reported as a roman numeral, for the purposes of this API, intensity is expected as the decimal equivalent of the roman numeral. 
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 10.0
+              severity: warn
+              row_condition: "modified_mercalli_intensity is not null"
+      - name: has_noaa_tsunami_link
+        description: This flag is set to TRUE for large events in oceanic regions and FALSE otherwise. The existence or value of this flag does not indicate if a tsunami actually did or will exist. If the flag value is TRUE, the event will include a link to the NOAA Tsunami website for tsunami information. The USGS is not responsible for Tsunami warning; we are simply providing a link to the authoritative NOAA source.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: [true, false]
+              quote_values: false
+              severity: warn
+      - name: number_of_stations
+        description: The total number of seismic stations used to determine earthquake location.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+              row_condition: "number_of_stations is not null"
+      - name: horizontal_distance_to_nearest_station_deg
+        description: Horizontal distance from the epicenter to the nearest station (in degrees). 1 degree is approximately 111.2 kilometers. In general, the smaller this number, the more reliable is the calculated depth of the earthquake.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 180.0
+              severity: warn
+              row_condition: "horizontal_distance_to_nearest_station_deg is not null"
+      - name: rms_travel_time_residual_sec
+        description: The root-mean-square (RMS) travel time residual, in sec, using all weights. This parameter provides a measure of the fit of the observed arrival times to the predicted arrival times for this location. Smaller numbers reflect a better fit of the data. The value is dependent on the accuracy of the velocity model used to compute the earthquake location, the quality weights assigned to the arrival time data, and the procedure used to locate the earthquake.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 120.0  # Adjust this threshold based on what you consider "poor but possible"
+              severity: warn
+              row_condition: "rms_travel_time_residual_sec is not null"
+      - name: azimuthal_gap_deg
+        description: 	The largest azimuthal gap between azimuthally adjacent stations (in degrees). In general, the smaller this number, the more reliable is the calculated horizontal position of the earthquake. Earthquake locations in which the azimuthal gap exceeds 180 degrees typically have large location and depth uncertainties.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 360.0
+              severity: warn
+              row_condition: "azimuthal_gap_deg is not null"
+      - name: place
+        description: Textual description of named geographic region near to the event. This may be a city name, or a Flinn-Engdahl Region name.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: code
+        description: An identifying code assigned by - and unique from - the corresponding source for the event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: title
+        description: A short name of the record.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: detail
+        description: 	Link to GeoJSON detail feed from a GeoJSON summary feed.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^https://earthquake\\.usgs\\.gov/'
+              severity: warn
+      - name: url
+        description: Link to USGS Event Page for event.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          # Domain Consistency (Ensures it's from USGS)
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^https://earthquake\\.usgs\\.gov/'
+              severity: warn
+      - name: felt
+        description: The total number of felt reports submitted to the DYFI system.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+              row_condition: "felt is not null"
+      - name: seismic_significance_score
+        description: A number describing how significant the event is. Larger numbers indicate a more significant event. This value is determined on a number of factors, including magnitude, maximum MMI, felt reports, and estimated impact.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: related_event_ids_list
+        description: A comma-separated list of event ids that are associated to an event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: related_event_sources_list
+        description: A comma-separated list of network contributors.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: related_event_types_list
+        description: A comma-separated list of product types associated to this event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: timezone_offset_hours
+        description: Timezone offset from UTC in hours at the event epicenter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -12.0
+              max_value: 12.0
+              severity: warn
+              row_condition: "timezone_offset_hours is not null"
+      - name: time_utc
+        description: Time (in milliseconds) when the event occurred, formatted to timestamp for readability.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "CAST('1970-01-01 00:00:00 UTC' AS TIMESTAMP)"
+              max_value: "TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)"  # bigquery specific
+              severity: warn
+      - name: updated_utc
+        description: Time when the event was most recently updated. Times are reported in milliseconds since the epoch. In certain output formats, the date is formatted for readability.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "CAST('1970-01-01 00:00:00 UTC' AS TIMESTAMP)"
+              max_value: "TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)"  # bigquery specific
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
+

@@ -1,0 +1,306 @@
+version: 2
+
+sources:
+  - name: bronze
+    database: my-free-tier-16-6
+    schema: bronze
+    tables: 
+      - name: usgs_earthquakes
+
+models:
+  - name: usgs_earthquakes_cleaned
+    description: Loads and cleans data from bronze.earthquake_data, keeping all meaningful columns
+    columns:
+      - name: id
+        description: Unique identifier for each earthquake event
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: mag
+        description: The magnitude for the event.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_utils.accepted_range:
+              min_value: 2.0
+              max_value: 10.0
+              severity: warn
+      - name: place
+        description: Textual description of named geographic region near to the event. This may be a city name, or a Flinn-Engdahl Region name.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: time_utc
+        description: Time (in milliseconds) when the event occurred, formatted to timestamp for readability.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "CAST('1970-01-01 00:00:00 UTC' AS TIMESTAMP)"
+              max_value: "TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)"  # bigquery specific
+              severity: warn
+      - name: updated_utc
+        description: Time when the event was most recently updated. Times are reported in milliseconds since the epoch. In certain output formats, the date is formatted for readability.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: "CAST('1970-01-01 00:00:00 UTC' AS TIMESTAMP)"
+              max_value: "TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)"  # bigquery specific
+              severity: warn
+      - name: tz_hrs
+        description: Timezone offset from UTC in hours at the event epicenter.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -12.0
+              max_value: 12.0
+              severity: warn
+              row_condition: "tz_hrs is not null"  # don't run this test if tz_hrs is null
+      - name: url
+        description: Link to USGS Event Page for event.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          # Domain Consistency (Ensures it's from USGS)
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^https://earthquake\\.usgs\\.gov/'
+              severity: warn
+      - name: detail
+        description: 	Link to GeoJSON detail feed from a GeoJSON summary feed.
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: '^https://earthquake\\.usgs\\.gov/'
+              severity: warn
+      - name: felt
+        description: The total number of felt reports submitted to the DYFI system.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+              row_condition: "felt is not null"
+      - name: cdi
+        description: 	The maximum reported intensity (community determined intensity) for the event. Computed by DYFI. While typically reported as a roman numeral, for the purposes of this API, intensity is expected as the decimal equivalent of the roman numeral.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 10.0
+              severity: warn
+              row_condition: "cdi is not null"
+      - name: mmi
+        description: The maximum estimated instrumental intensity (modified/measured Mercalli intensity) for the event. Computed by ShakeMap. While typically reported as a roman numeral, for the purposes of this API, intensity is expected as the decimal equivalent of the roman numeral. 
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 10.0
+              severity: warn
+              row_condition: "mmi is not null"
+      - name: alert
+        description: The alert level from the PAGER earthquake impact scale.
+        tests:
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['yellow', 'orange', 'red', 'green']
+              severity: warn
+              row_condition: "alert is not null"
+      - name: status
+        description: 	Indicates whether the event has been reviewed by a human.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['manual', 'reviewed', 'automatic']
+              severity: warn
+              row_condition: "status is not null"
+      - name: has_noaa_tsunami_link
+        description: This flag is set to TRUE for large events in oceanic regions and FALSE otherwise. The existence or value of this flag does not indicate if a tsunami actually did or will exist. If the flag value is TRUE, the event will include a link to the NOAA Tsunami website for tsunami information. The USGS is not responsible for Tsunami warning; we are simply providing a link to the authoritative NOAA source.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: [true, false]
+              quote_values: false
+              severity: warn
+      - name: sig
+        description: A number describing how significant the event is. Larger numbers indicate a more significant event. This value is determined on a number of factors, including magnitude, maximum MMI, felt reports, and estimated impact.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+          - not_null:
+              severity: warn
+      - name: net
+        description: The network ID of a data contributor. Identifies the network considered to be the preferred source of information for this event.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: code
+        description: An identifying code assigned by - and unique from - the corresponding source for the event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: ids
+        description: A comma-separated list of event ids that are associated to an event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: sources
+        description: A comma-separated list of network contributors.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: types
+        description: A comma-separated list of product types associated to this event.
+        tests:
+          - not_null:
+                severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: nst
+        description: The total number of seismic stations used to determine earthquake location.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              severity: warn
+              row_condition: "nst is not null"
+      - name: dmin
+        description: Horizontal distance from the epicenter to the nearest station (in degrees). 1 degree is approximately 111.2 kilometers. In general, the smaller this number, the more reliable is the calculated depth of the earthquake.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 180.0
+              severity: warn
+              row_condition: "dmin is not null"
+      - name: rms
+        description: The root-mean-square (RMS) travel time residual, in sec, using all weights. This parameter provides a measure of the fit of the observed arrival times to the predicted arrival times for this location. Smaller numbers reflect a better fit of the data. The value is dependent on the accuracy of the velocity model used to compute the earthquake location, the quality weights assigned to the arrival time data, and the procedure used to locate the earthquake.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 120.0  # Adjust this threshold based on what you consider "poor but possible"
+              severity: warn
+              row_condition: "rms is not null"
+      - name: gap
+        description: 	The largest azimuthal gap between azimuthally adjacent stations (in degrees). In general, the smaller this number, the more reliable is the calculated horizontal position of the earthquake. Earthquake locations in which the azimuthal gap exceeds 180 degrees typically have large location and depth uncertainties.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0.0
+              max_value: 360.0
+              severity: warn
+              row_condition: "gap is not null"
+      - name: magType
+        description: 	The method or algorithm used to calculate the preferred magnitude for the event.
+        tests:
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: event_type
+        description: Type of seismic event.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: title
+        description: A short name of the record.
+        tests:
+          - not_null:
+              severity: warn
+          - no_whitespace:
+              severity: warn
+          - dbt_utils.not_empty_string:
+              trim_whitespace: true
+              severity: warn
+      - name: longitude
+        description: Decimal degrees longitude. Negative values for western longitudes.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -180.0
+              max_value: 180.0
+              severity: warn
+      - name: latitude
+        description: Decimal degrees latitude. Negative values for southern latitudes.
+        tests:
+          - not_null:
+              severity: warn
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -90.0
+              max_value: 90.0
+              severity: warn
+      - name: depth_km
+        description: Depth of the event in kilometers.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -10.0
+              max_value: 1000.0
+              severity: warn
+      - name: dwh_creation_datetime
+        description: The datetime when the data was created in the data warehouse.
+        tests:
+          - not_null:
+              severity: warn
