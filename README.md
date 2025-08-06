@@ -27,6 +27,7 @@ The data architecture for this project follows Medallion Architecture **Bronze**
 - **dbt (data build tool)**: Employed for data transformation and modeling within BigQuery. dbt allows for SQL-based transformations, version control of data models, and automated testing, ensuring data quality and consistency across the silver and gold layers.
 - **Docker & Docker Compose**: Used to containerize the Airflow environment, providing a consistent and isolated development and deployment setup.
 - **Microsoft Power BI**: A powerful business intelligence (BI) tool used for data visualization and interactive dashboards. It connects directly to the curated data in BigQuery's gold layer to provide insights and reporting.
+- **Notion**: Utilized for project planning, task management, and documentation. It serves as a central hub for outlining project requirements, tracking progress, and organizing key information. ![Notion Project Steps](https://prickle-philosophy-032.notion.site/Data-Engineering-Project-2384b48d6676803fb04ae585b070cf8d?source=copy_link)
 
 ---
 
