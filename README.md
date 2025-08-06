@@ -11,7 +11,7 @@ The core objective of this project is to create a reliable and scalable workflow
 ---
 ## 🏗️ Data Architecture
 The data architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
-![Data Architecture](docs/data_architecture.png)
+![Data Architecture](docs/png/data_architecture.png)
 
 1. **Bronze**: The Bronze layer serves as the raw data landing zone. It holds external tables in BigQuery that link directly to data in GCS buckets. Raw JSON files from the API are stored in a raw folder, and after conversion, optimized Parquet files are placed in a parquet folder.
 2. **Silver**: This layer includes data cleansing, standardization, and normalization process to prepare data for analysis.
