@@ -48,7 +48,58 @@ This project demonstrates a robust, cloud-native approach to building a scalable
 
 ---
 
-## 
+## 📂 Repository Structure
+```
+de_project_usgs_earthquakes
+├───airflow
+│   ├───.dbt                                      # create this folder and put your profiles.yml here
+│   ├───.gcp                                      # create this folder and put your gcp json key here
+│   ├───config                                    # create this folder (required by airflow)
+│   ├───dags                                      # create this folder (required by airflow)
+│   │   └───data_pipeline_dag.py                  # airflow dag for this project
+│   ├───data                                      # create this folder (required for data storage)
+│   ├───dbt                                       # dbt project folder, created with dbt init
+│   │   ├───analyses
+│   │   ├───macros
+│   │   │   ├───get_custom_schema.sql             # without this file, your bigquery dataset name will concat with another dataset name that you set in profile.yml
+│   │   │   └───test_no_whitespace.sql            # a commonly-needed test but dbt didn't have it
+│   │   ├───models
+│   │   │   ├───gold                              # contain the sql model file written to transform the data in the silver later
+│   │   │   │   ├───dim_alert.sql
+│   │   │   │   ├───dim_date.sql
+│   │   │   │   ├───dim_event_type.sql
+│   │   │   │   ├───dim_magnitude_method.sql
+│   │   │   │   ├───dim_network.sql
+│   │   │   │   ├───dim_status.sql
+│   │   │   │   ├───fact_earthquakes.sql
+│   │   │   │   └───schema.yml                    # contain descriptions and tests for each column of all the models in the folder
+│   │   │   ├───silver                            # contain the sql model file written to transform the data in the bronze/source later
+│   │   │   │   ├───usgs_earthquakes_cleaned.sql
+│   │   │   │   └───schema.yml
+│   │   ├───seeds                                 # empty, you can put small constant/reference files here 
+│   │   ├───snapshots
+│   │   ├───tests
+│   │   │   ├───assert_id_format.sql              # these tests are more specfic than the general tests used in the macro folder 
+│   │   │   └───assert_title_format.sql
+│   ├───logs                                      # create this folder (required by airflow)
+│   ├───plugins                                   # create this folder (required by airflow)
+│   ├───scripts                                   # all the python and bash scripts used in the dag are from here
+│   │   ├───1_download_earthquake_data.py
+│   │   ├───2_organize_data_raw.sh
+│   │   ├───3_upload_json_to_gcs.sh
+│   │   ├───4_convert_to_parquet.py
+│   │   ├───5_organize_data_parquet.sh
+│   │   ├───6_upload_parquet_to_gcs.sh
+│   │   ├───7_create_bq_datasets.sh
+│   │   └───8_create_bq_bronze_table.sh
+├───BI                                            # contain the pbit file exported from power BI desktop
+└───docs
+    ├───drawio                                    # folder containing drawio file made for this project
+    │   ├───data_architecture.drawio
+    │   └───data_model.drawio
+    ├───ico                                       # some icon used when making drawio file
+    └───png                                       # 
+```
 
 ## 🛡️ License
 
