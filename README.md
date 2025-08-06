@@ -93,13 +93,15 @@ de_project_usgs_earthquakes/
 │   │   ├───7_create_bq_datasets.sh
 │   │   └───8_create_bq_bronze_table.sh
 ├───BI/                                           # contain the pbit file exported from power BI desktop
-└───docs/
-    ├───drawio/                                   # contain drawio file made for this project
-    │   ├───data_architecture.drawio
-    │   └───data_model.drawio
-    ├───ico/                                      # contain some icon used when making drawio file
-    └───png/                                      # contain some screenshots from bigquery, dbt, cloud storage, airflow, and drawio file.
-
+├───docs/
+│   ├───drawio/                                   # contain drawio file made for this project
+│   │   ├───data_architecture.drawio
+│   │   └───data_model.drawio
+│   ├───ico/                                      # contain some icon used when making drawio file
+│   ├───png/                                      # contain some screenshots from bigquery, dbt, cloud storage, airflow, and drawio file.
+│   ├───data_dictionary.md                        # description of all the columns in this project copied from official source
+│   └───naming_conventions.md                     # some sets  of rules on naming files and tables for this project
+└───project workbook.ipynb                        # project workbook, all the scripts before dbt were written and tested here first before writing them into scripts folder
 ```
 
 ## 🛡️ License
