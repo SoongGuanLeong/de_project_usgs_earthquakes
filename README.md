@@ -104,6 +104,23 @@ de_project_usgs_earthquakes/
 └───project workbook.ipynb                        # project workbook, all the scripts before dbt were written and tested here first before writing them into scripts folder
 ```
 
+## 🚀 Getting Started: Duplicate This Project Locally
+This project is designed to be easily reproducible using Docker and Docker Compose. Follow these steps to set up and run the entire data pipeline on your local machine.
+
+### Prerequisites
+Before you begin, ensure you have the following installed on your system:
+- **Git**: For cloning the repository.
+- **Docker Desktop**: Includes Docker Engine and Docker Compose.
+- **Google Cloud SDK**: Essential for authenticating with GCP, managing projects, and using gsutil.
+
+### Setup Steps
+1. Clone the Repository
+2. Setup Google Cloud Platform (GCP). You need to have the following:
+- GCP Project
+- Service Account that have permission `BigQuery Data Editor`, `BigQuery Job User`, `BigQuery User`, `Storage Admin`, `Storage Object Creator`, then download the key as json.
+- Google Cloud Storage (GCS) Bucket and then create two folder (raw & parquet) in the bucket.
+- BigQuery Datasets (while we will create bronze, silver and gold, we need to create one for dbt to test connection to bigquery)
+
 ## 🛡️ License
 
 This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and share this project with proper attribution.
