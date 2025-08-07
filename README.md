@@ -92,7 +92,7 @@ de_project_usgs_earthquakes/
 │   │   ├───6_upload_parquet_to_gcs.sh
 │   │   ├───7_create_bq_datasets.sh
 │   │   └───8_create_bq_bronze_table.sh
-├───BI/                                           # contain the pbit file exported from power BI desktop
+├───BI/                                           # contain the pbit and pdf file exported from power BI desktop
 ├───docs/
 │   ├───drawio/                                   # contain drawio file made for this project
 │   │   ├───data_architecture.drawio
