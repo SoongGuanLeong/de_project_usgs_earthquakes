@@ -31,7 +31,7 @@ The data architecture for this project follows Medallion Architecture **Bronze**
 
 ---
 
-## Data Pipeline Flow
+## ⚙️ Data Pipeline Flow
 The pipeline follows a typical Extract, Load, Transform (ELT) pattern:
 
 1. **Extract (E)**: Airflow triggers a Python script to download raw earthquake data in JSON format from the USGS API.
